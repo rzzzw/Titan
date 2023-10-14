@@ -27,7 +27,8 @@ public class YelpAPI {
 	private static final String TOKEN_TYPE = "Bearer";
 	private static final String API_KEY = "LudZ-yymkd1q9o_8ViT015QK-wQXYNC_h1vydW0bWw4cFIT62ZWRzA_4ZIxLgo4WHsENigJU0dEdGl7Bbh5lUVSgozPWzZC4Vy8Z4N-0nWO_IKOnLx6vJ0nrzPosYnYx";
 	
-	public JSONArray search(double lat, double lon, String term) {
+
+	public List<Item> search(double lat, double lon, String term) {
 		if (term == null || term.isEmpty()) {
 			term = DEFAULT_TERM;
 		}
@@ -49,7 +50,7 @@ public class YelpAPI {
 			System.out.println("Sending request to URL: " + url);
 			System.out.println("Response code: " + responseCode);
 			if (responseCode != 200) {
-				return new JSONArray();
+				return new ArrayList<>();
 			}
 			BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 			String inputLine = "";
@@ -60,12 +61,12 @@ public class YelpAPI {
 			in.close();
 			JSONObject obj = new JSONObject(response.toString());
 			if (!obj.isNull("businesses")) {
-				return obj.getJSONArray("businesses");
+				return getItemList(obj.getJSONArray("businesses"));
 			}
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
-		return new JSONArray();
+		return new ArrayList<>();
 	}
 
 	/**
@@ -129,14 +130,10 @@ public class YelpAPI {
 	}	
 	
 	private void queryAPI(double lat, double lon) {
-		JSONArray items = search(lat, lon, null);
-		try {
-			for (int i = 0; i < items.length(); i++) {
-				JSONObject item = items.getJSONObject(i);
-				System.out.println(item.toString(2));
-			}
-		} catch(JSONException e) {
-			e.printStackTrace();
+		List<Item> itemList = search(lat, lon, null);
+		for (Item item : itemList) {
+			JSONObject jsonObject = item.toJSONObject();
+			System.out.println(jsonObject);
 		}
 	}
 	
